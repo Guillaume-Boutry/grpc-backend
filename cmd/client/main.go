@@ -24,7 +24,7 @@ func main() {
 
 	request := face_authenticator.EnrollRequest{
 		FaceRequest: &face_authenticator.FaceRequest{
-			Id:   "Send enroll",
+			Id:   "patrick.balkany@gmail.com",
 			Face: img,
 			FaceCoordinates: &face_authenticator.FaceCoordinates{
 				TopLeft: &face_authenticator.Point{

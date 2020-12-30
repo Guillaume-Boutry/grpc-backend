@@ -3,7 +3,7 @@ syntax = "proto3";
 package face_authenticator;
 
 
-// protoc --go_out=pkg/face-authenticator --go_opt=paths=source_relative --go-grpc_out=pkg/face-authenticator --go-grpc_opt=paths=source_relative -I face-authenticator/ face-authenticator/workflow.proto
+// protoc --go_out=pkg/face-authenticator --go_opt=paths=source_relative --go-grpc_out=pkg/face_authenticator --go-grpc_opt=paths=source_relative -I face-authenticator/ face-authenticator/workflow.proto
 option go_package = "github.com/Guillaume-Boutry/face_authenticator";
 
 service Enroller {
@@ -54,6 +54,8 @@ message AuthenticateRequest {
 message AuthenticateResponse {
   AuthenticateStatus status = 1;
   string message = 2;
+  float score = 3;
+  bool decision = 4;
 }
 
 enum AuthenticateStatus {

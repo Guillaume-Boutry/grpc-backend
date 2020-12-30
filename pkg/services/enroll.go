@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"github.com/Guillaume-Boutry/grpc-backend/pkg/face_authenticator"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/golang/protobuf/proto"
@@ -56,8 +58,8 @@ func (serviceImpl *EnrollerServiceGrpcImpl) Enroll(ctx context.Context, request 
 
 			result, err := serviceImpl.client.Request(newCtx, r)
 			// Reçu depuis Enroller
-			if cloudevents.IsNACK(err){
-				return nil, status.Error(codes.Internal, "Enroller failed to perform task")
+			if cloudevents.IsNACK(err) {
+				return nil, status.Error(codes.Internal, fmt.Sprintf("Enroller failed to perform task: %#v, %#v", err, errors.Unwrap(err)))
 			}
 
 			response := &face_authenticator.EnrollResponse{}
