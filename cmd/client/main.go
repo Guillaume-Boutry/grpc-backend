@@ -10,7 +10,8 @@ import (
 )
 
 func main() {
-	address := "127.0.0.1:9000"
+	address := "grpc-backend.default.127.0.0.1.nip.io:80"
+	//address := "127.0.0.1:9000"
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
 		fmt.Println(err)
@@ -19,9 +20,22 @@ func main() {
 	defer conn.Close()
 
 	client := face_authenticator.NewEnrollerClient(conn)
+	img, err := ioutil.ReadFile("/home/guillaume/go/src/go-face-test/luda2.jpg")
+
 	request := face_authenticator.EnrollRequest{
 		FaceRequest: &face_authenticator.FaceRequest{
-			Id: "test",
+			Id:   "Send enroll",
+			Face: img,
+			FaceCoordinates: &face_authenticator.FaceCoordinates{
+				TopLeft: &face_authenticator.Point{
+					X: 362,
+					Y: 404,
+				},
+				BottomRight: &face_authenticator.Point{
+					X: 734,
+					Y: 775,
+				},
+			},
 		},
 	}
 
@@ -29,14 +43,7 @@ func main() {
 	fmt.Println(res)
 	fmt.Println(err)
 
-	img, err := ioutil.ReadFile("/home/guillaume/go/src/go-face-test/luda2.jpg")
-
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	clientAuthent := face_authenticator.NewAuthenticatorClient(conn)
+	/*clientAuthent := face_authenticator.NewAuthenticatorClient(conn)
 	requestAuthent := face_authenticator.AuthenticateRequest{
 		FaceRequest: &face_authenticator.FaceRequest{
 			Id:   "Send authent",
@@ -56,5 +63,5 @@ func main() {
 
 	res2, err2 := clientAuthent.Authenticate(context.Background(), &requestAuthent)
 	fmt.Println(res2)
-	fmt.Println(err2)
+	fmt.Println(err2)*/
 }

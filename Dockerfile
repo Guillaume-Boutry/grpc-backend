@@ -1,12 +1,11 @@
-FROM registry.zouzland.com/face-authenticator-builder AS builder
-RUN go get google.golang.org/grpc
-COPY . $GOPATH/src/github.com/Guillaume-Boutry/grpc-backend
-WORKDIR $GOPATH/src/github.com/Guillaume-Boutry/grpc-backend
-RUN go build ./cmd/tmp-backend
+FROM golang:1.15-buster AS builder
+WORKDIR /app
+COPY go.* ./
+RUN go mod download
+COPY . ./
+RUN go build ./cmd/backend
 
-FROM registry.zouzland.com/face-authenticator-runer
-COPY models.txt models.txt
-RUN wget -i models.txt --directory-prefix=/opt/grpc-backend && bzip2 -d $(ls /opt/grpc-backend/*.bz2)
-COPY --from=builder /go/src/github.com/Guillaume-Boutry/grpc-backend/tmp-backend /opt/grpc-backend/backend
+FROM ubuntu:20.04
+COPY --from=builder /app/backend /opt/grpc-backend/backend
 
 CMD ["/opt/grpc-backend/backend"]
