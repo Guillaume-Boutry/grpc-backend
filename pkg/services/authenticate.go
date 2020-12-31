@@ -2,8 +2,6 @@ package service
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"github.com/Guillaume-Boutry/grpc-backend/pkg/face_authenticator"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/golang/protobuf/proto"
@@ -11,6 +9,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"log"
+	"time"
 )
 
 type AuthenticateServiceGrpcImpl struct {
@@ -53,18 +52,24 @@ func (serviceImpl *AuthenticateServiceGrpcImpl) Authenticate(ctx context.Context
 			}
 			newCtx := cloudevents.ContextWithTarget(ctx, serviceImpl.Target)
 
-			result, err := serviceImpl.client.Request(newCtx, r)
-			// Reçu depuis Enroller
-			if cloudevents.IsNACK(err) {
-				return nil, status.Error(codes.Internal, fmt.Sprintf("Authenticator failed to perform task: %#v, %#v", err, errors.Unwrap(err)))
+			response, res := serviceImpl.client.Request(newCtx, r)
+			if cloudevents.IsUndelivered(res) {
+				log.Printf("Failed to request: %v", res)
+				return nil, res
+			} else if response != nil {
+				log.Printf("Got Event Response Context: %+v\n", response.Context)
+			} else {
+				log.Printf("Event sent at %s and failed", time.Now())
+				return nil, status.Error(codes.Internal, "Authenticator failed to perform task")
 			}
 
-			response := &face_authenticator.AuthenticateResponse{}
-			if err := proto.Unmarshal(result.Data(), response); err != nil {
+
+			responseObject := &face_authenticator.AuthenticateResponse{}
+			if err := proto.Unmarshal(response.Data(), responseObject); err != nil {
 				return nil, status.Error(codes.Internal, "Failed to parse authenticator response")
 			}
 			// Envoie au client
-			return response, nil
+			return responseObject, nil
 		}
 	}
 	return nil, status.Error(codes.Canceled, "FaceRequest cannot be empty")
