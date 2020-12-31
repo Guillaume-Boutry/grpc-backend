@@ -63,11 +63,22 @@ func (serviceImpl *AuthenticateServiceGrpcImpl) Authenticate(ctx context.Context
 				return nil, status.Error(codes.Internal, "Authenticator failed to perform task")
 			}
 
+			msg := &Message{}
+			if err := response.DataAs(msg); err != nil {
+				log.Println(err)
+				return nil, status.Error(codes.Internal, "Failed to parse json response")
+			}
+			if msg.Payload == nil {
+				return nil, status.Error(codes.DataLoss, "Authentication response empty")
+			}
+
 
 			responseObject := &face_authenticator.AuthenticateResponse{}
-			if err := proto.Unmarshal(response.Data(), responseObject); err != nil {
+			if err := proto.Unmarshal(msg.Payload, responseObject); err != nil {
 				return nil, status.Error(codes.Internal, "Failed to parse authenticator response")
 			}
+			log.Printf("Msg: %s, Score: %f, Decision: %t", responseObject.Message, responseObject.Score, responseObject.Decision)
+
 			// Envoie au client
 			return responseObject, nil
 		}

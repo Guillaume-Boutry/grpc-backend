@@ -7,7 +7,7 @@ spec:
   template:
     spec:
       containers:
-        - image: registry.zouzland.com/grpc-backend:0.0.20
+        - image: registry.zouzland.com/grpc-backend:0.0.24
           name: grpc-backend
           env:
             - name: K_SINK_ENROLL

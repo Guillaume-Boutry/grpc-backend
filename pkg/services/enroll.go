@@ -66,8 +66,16 @@ func (serviceImpl *EnrollerServiceGrpcImpl) Enroll(ctx context.Context, request 
 				return nil, status.Error(codes.Internal, "Enroller failed to perform task")
 			}
 
+			msg := &Message{}
+			if err := response.DataAs(msg); err != nil {
+				return nil, status.Error(codes.Internal, "Failed to parse json response")
+			}
+			if msg.Payload == nil {
+				return nil, status.Error(codes.DataLoss, "Enroll response empty")
+			}
+
 			responseObject := &face_authenticator.EnrollResponse{}
-			if err := proto.Unmarshal(response.Data(), responseObject); err != nil {
+			if err := proto.Unmarshal(msg.Payload, responseObject); err != nil {
 				return nil, status.Error(codes.Internal, "Failed to parse enroller response")
 			}
 			// Envoie au client
