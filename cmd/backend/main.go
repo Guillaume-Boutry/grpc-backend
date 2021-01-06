@@ -6,6 +6,7 @@ import (
 	service "github.com/Guillaume-Boutry/grpc-backend/pkg/services"
 	"github.com/kelseyhightower/envconfig"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 	"log"
 	"net"
 )
@@ -21,7 +22,7 @@ func main() {
 	}
 	fmt.Printf("Starting grpc server on port %d\n", config.Port)
 
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", config.Port))
+	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", config.Port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -29,7 +30,7 @@ func main() {
 	authenticateImpl := service.NewAuthenticateServiceGrpcImpl()
 
 	grpcServer := grpc.NewServer()
-
+	reflection.Register(grpcServer)
 	face_authenticator.RegisterEnrollerServer(grpcServer, enrollImpl)
 	face_authenticator.RegisterAuthenticatorServer(grpcServer, authenticateImpl)
 

@@ -5,6 +5,9 @@ metadata:
   namespace: default
 spec:
   template:
+    metadata:
+      labels:
+        select: grpc-backend
     spec:
       containers:
         - image: registry.zouzland.com/grpc-backend:0.0.25
@@ -19,3 +22,14 @@ spec:
               containerPort: 9000
       imagePullSecrets:
         - name: regcred
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grpc-backend-internal
+spec:
+  ports:
+    - port: 9000
+      protocol: TCP
+  selector:
+    select: grpc-backend
